@@ -12,14 +12,14 @@ bigInt = 1<<64
 def home():
     return render_template('index.html')
 
-@app.route('/req', methods=['GET'])
+@app.route('/req', methods=['POST'])
 def req():
-    req = request.args.get('req')
+    req = request.form.get('req')
 
     result = chat_with_model(prompt=req)
     think = result['thinking']
     content = result['content']
 
-    return render_template('index.html', thinking = think, content=content)
+    return render_template('index.html', thinking = think, content=content, req=req)
 
 app.run(debug=True)

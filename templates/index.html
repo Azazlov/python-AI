@@ -12,9 +12,9 @@
         Это мой сайт с мозгами, тут вы можете пообщаться с роботом
     </header>
     <main>
-        <form action="/req" method="get">
+        <form action="/req" method="post">
             <label for="input">Вопрос для нейросети</label>
-            <input value="" name='req' placeholder="Введите ваш запрос">
+            <input value="{{ req }}" name='req' placeholder="Введите ваш запрос">
             <button type="submit">Отправить</button>
         </form>
         {% if thinking %}
