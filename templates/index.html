@@ -1,0 +1,26 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Сайтик с мозгами типа</title>
+
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+</head>
+<body>
+    <header>
+        Это мой сайт с мозгами, тут вы можете пообщаться с роботом
+    </header>
+    <main>
+        <form action="/req" method="get">
+            <label for="input">Вопрос для нейросети</label>
+            <input value="" name='req' placeholder="Введите ваш запрос">
+            <button type="submit">Отправить</button>
+        </form>
+        {% if thinking %}
+            <p>{{ thinking }}</p>
+            <p>{{ content }}</p>
+        {% endif %}
+    </main>
+</body>
+</html>
