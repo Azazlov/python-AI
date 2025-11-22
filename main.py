@@ -1,5 +1,4 @@
 from flask import Flask, request, render_template
-from random import randint
 from ai import chat_with_model, load_model
 
 app = Flask(__name__)
