@@ -31,7 +31,7 @@ def req():
     req = request.form.get('req')
     print(f'Получен запрос: {req}')
     # True изменить на получение состояния checkbox в html
-    result = loading(chat_with_model, req, False)
+    result = loading(chat_with_model, req, True)
     print(f'Запрос обработан')
     think = result['thinking']
     content = result['content']
