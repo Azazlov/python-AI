@@ -1,8 +1,9 @@
 from transformers import AutoModelForCausalLM, AutoTokenizer
 
-# Глобальные переменные для модели и токенизатора
 _model = None
 _tokenizer = None
+
+# Добавить еще одну свою модель и настроить ее
 
 def load_model(model_name: str = "Qwen/Qwen3-0.6B"):
     """Загружает модель и токенизатор один раз и сохраняет в глобальные переменные."""
@@ -19,7 +20,9 @@ def load_model(model_name: str = "Qwen/Qwen3-0.6B"):
         print("Модель загружена.")
     return _model, _tokenizer
 
-def chat_with_model(prompt: str, max_new_tokens: int = 2048):
+def chat_with_model(prompt: str, enable_thinking: bool, max_new_tokens: int = 2048):
+    enable_thinking = True if enable_thinking is None else enable_thinking
+
     """
     Генерирует ответ модели на заданный промпт.
     
@@ -33,42 +36,33 @@ def chat_with_model(prompt: str, max_new_tokens: int = 2048):
     if _model is None or _tokenizer is None:
         raise RuntimeError("Модель не загружена. Вызовите load_model() сначала.")
 
-    # Формируем сообщение в формате чата
     messages = [{"role": "user", "content": prompt}]
     
-    # Применяем шаблон чата
     text = _tokenizer.apply_chat_template(
         messages,
         tokenize=False,
         add_generation_prompt=True,
-        enable_thinking=True  # Включаем режим размышлений
+        enable_thinking=enable_thinking 
     )
 
-    # Токенизируем
     model_inputs = _tokenizer([text], return_tensors="pt").to(_model.device)
 
-    # Генерация
     generated_ids = _model.generate(
         **model_inputs,
         max_new_tokens=max_new_tokens,
         pad_token_id=_tokenizer.eos_token_id
     )
 
-    # Отделяем сгенерированный ответ от входного промпта
     input_length = model_inputs.input_ids.shape[1]
     output_ids = generated_ids[0][input_length:].tolist()
 
-    # Идентификатор токена </think> (может отличаться — убедитесь!)
     THINK_END_TOKEN_ID = 151668
 
-    # Извлекаем thinking и content
     try:
-        # Ищем последнее вхождение </think>
         reversed_output = output_ids[::-1]
         pos = reversed_output.index(THINK_END_TOKEN_ID)
         index = len(output_ids) - pos
     except ValueError:
-        # Токен </think> не найден — весь вывод считаем основным контентом
         index = 0
 
     thinking_ids = output_ids[:index]
