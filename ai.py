@@ -1,96 +1,54 @@
 from transformers import AutoModelForCausalLM, AutoTokenizer
 
-_model = None
-_tokenizer = None
+class QwenChatbot:
+    def __init__(self, model_name="Qwen/Qwen3-0.6B"):
+        print('Создание чат-бота...')
+        self.tokenizer = AutoTokenizer.from_pretrained(model_name)
+        print('Инициализация токенов завершена')
+        self.model = AutoModelForCausalLM.from_pretrained(model_name)
+        print('Инициализация модели чат-бота завершена')
+        self.history = []
 
-# Добавить еще одну свою модель и настроить ее
+    def generate_response(self, user_input):
+        print('Генерация ответа...')
+        messages = self.history + [{"role": "user", "content": user_input}]
 
-def load_model(model_name: str = "Qwen/Qwen3-0.6B"):
-    """Загружает модель и токенизатор один раз и сохраняет в глобальные переменные."""
-    global _model, _tokenizer
-    if _model is None or _tokenizer is None:
-        print("Загрузка модели и токенизатора...")
-        _tokenizer = AutoTokenizer.from_pretrained(model_name, trust_remote_code=True)
-        _model = AutoModelForCausalLM.from_pretrained(
-            model_name,
-            dtype="auto",
-            device_map="auto",
-            trust_remote_code=True
+        text = self.tokenizer.apply_chat_template(
+            messages,
+            tokenize=False,
+            add_generation_prompt=True
         )
-        print("Модель загружена.")
-    return _model, _tokenizer
 
-def chat_with_model(prompt: str, enable_thinking: bool, max_new_tokens: int = 2048):
-    enable_thinking = True if enable_thinking is None else enable_thinking
+        inputs = self.tokenizer(text, return_tensors="pt")
+        response_ids = self.model.generate(**inputs, max_new_tokens=32768)[0][len(inputs.input_ids[0]):].tolist()
+        response = self.tokenizer.decode(response_ids, skip_special_tokens=True)
 
-    """
-    Генерирует ответ модели на заданный промпт.
-    
-    Возвращает словарь:
-    {
-        "thinking": "...",  # (может быть пустым)
-        "content": "..."
-    }
-    """
-    global _model, _tokenizer
-    if _model is None or _tokenizer is None:
-        raise RuntimeError("Модель не загружена. Вызовите load_model() сначала.")
+        # Update history
+        self.history.append({"role": "user", "content": user_input})
+        self.history.append({"role": "assistant", "content": response})
 
-    messages = [{"role": "user", "content": prompt}]
-    
-    text = _tokenizer.apply_chat_template(
-        messages,
-        tokenize=False,
-        add_generation_prompt=True,
-        enable_thinking=enable_thinking 
-    )
+        return response
 
-    model_inputs = _tokenizer([text], return_tensors="pt").to(_model.device)
+# Example Usage
+if __name__ == "__main__":
+    chatbot = QwenChatbot()
 
-    generated_ids = _model.generate(
-        **model_inputs,
-        max_new_tokens=max_new_tokens,
-        pad_token_id=_tokenizer.eos_token_id
-    )
+    # First input (without /think or /no_think tags, thinking mode is enabled by default)
+    user_input_1 = "How many r's in strawberries?"
+    print(f"User: {user_input_1}")
+    response_1 = chatbot.generate_response(user_input_1)
+    print(f"Bot: {response_1}")
+    print("----------------------")
 
-    input_length = model_inputs.input_ids.shape[1]
-    output_ids = generated_ids[0][input_length:].tolist()
+    # Second input with /no_think
+    user_input_2 = "Then, how many r's in blueberries? /no_think"
+    print(f"User: {user_input_2}")
+    response_2 = chatbot.generate_response(user_input_2)
+    print(f"Bot: {response_2}") 
+    print("----------------------")
 
-    THINK_END_TOKEN_ID = 151668
-
-    try:
-        reversed_output = output_ids[::-1]
-        pos = reversed_output.index(THINK_END_TOKEN_ID)
-        index = len(output_ids) - pos
-    except ValueError:
-        index = 0
-
-    thinking_ids = output_ids[:index]
-    content_ids = output_ids[index:]
-
-    thinking_content = _tokenizer.decode(thinking_ids, skip_special_tokens=True).strip()
-    content = _tokenizer.decode(content_ids, skip_special_tokens=True).strip()
-
-    return {
-        "thinking": thinking_content,
-        "content": content
-    }
-
-if __name__=='__main__':
-    load_model()
-    import sys
-    import time
-    import threading
-    from loading import loading_animation
-    while True:
-        prompt = input('Запрос: ')
-        stop_loading = threading.Event()
-        loader_thread = threading.Thread(target=loading_animation, args=(stop_loading, "Обработка"))
-        loader_thread.start()
-        result = chat_with_model(prompt=prompt)
-        think = result['thinking']
-        content = result['content']
-        stop_loading.set()
-        loader_thread.join()
-        print(f'Мысли: {think}')
-        print(f'Ответ: {content}')
+    # Third input with /think
+    user_input_3 = "Really? /think"
+    print(f"User: {user_input_3}")
+    response_3 = chatbot.generate_response(user_input_3)
+    print(f"Bot: {response_3}")

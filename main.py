@@ -1,5 +1,5 @@
 from flask import Flask, request, render_template
-from ai import chat_with_model, load_model
+from ai import QwenChatbot
 from loading import loading
 
 
@@ -16,7 +16,7 @@ from loading import loading
 #         file.write(messages_JSON)
 
 app = Flask(__name__)
-load_model()
+chatbot = QwenChatbot()
 
 messages = []
 
@@ -24,20 +24,26 @@ messages = []
 def home():
     return render_template('index.html', messages=messages)
 
-# Добавить еще один роутинг с qr-кодом на гитхаб
+# Добавить еще один роутинг на страницу с qr-кодом на гитхаб (свой)
 
 @app.route('/req', methods=['POST'])
 def req():
     req = request.form.get('req')
+    # добавить переменную, получающую данные из формы по имени 'check'
     print(f'Получен запрос: {req}')
-    # True изменить на получение состояния checkbox в html
-    result = loading(chat_with_model, req, True)
+    # вывести 'Запрошено мышление: [Да/Нет]
+    # при "Да" изменить запрос, добавив в конце /think, при "Нет" добавить на конце /no_think
+    result = loading(chatbot.generate_response, req)
     print(f'Запрос обработан')
-    think = result['thinking']
-    content = result['content']
-    messages.append([req, think, content])
+    # think = ????
+    content = result
+    messages.append([req, '', content])
+    # метод добавления списка в список заменить на добавление словаря в список
+    # примеры ключей: 'request', 'thinking', 'content'
     print(f'Отправляю результат')
 
     return home()
+
+# добавить роутинг, возвращающий страницу для шифрования текста для переписок в макс (по желанию)
 
 app.run(debug=True, host="0.0.0.0", port=5005)

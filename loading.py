@@ -15,12 +15,11 @@ def loading_animation(stop_event, message="Загрузка"):
     sys.stdout.write("\r" + " " * (len(message) + 10) + "\r")
     sys.stdout.flush()
 
-def loading(event, *args):
+def loading(event, prompt):
     stop_loading = threading.Event()
-    loader_thread = threading.Thread(target=loading_animation, args=(stop_loading, "Обработка"))
+    loader_thread = threading.Thread(target=loading_animation, args=(stop_loading, "Генерация"))
     loader_thread.start()
-    print(args)
-    result = event(args[0], args[1])
+    result = event(prompt)
     stop_loading.set()
     loader_thread.join()
     
