@@ -2,5 +2,5 @@
 
 <img width="1920" height="1080" alt="изображение" src="https://github.com/user-attachments/assets/9a507cb2-4c2d-4450-90cf-d50bcd1adf62" />
 
-для установки всех зависимостей ввести в терминал команду `pip install -r minimal-requerments.txt`
+для установки всех зависимостей ввести в терминал команду `pip install -r ./minimal-requierments.txt`
 для запуска сервера ввести в термнила команду `python ./main.py`
