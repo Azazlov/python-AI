@@ -15,3 +15,5 @@ venv/
 Thumbs.db
 tmp/
 *.tmp
+sentiment.py
+translator.py
