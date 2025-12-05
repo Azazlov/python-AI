@@ -1,8 +1,12 @@
+# Сайт с искусственным интелектом на базе flask, transformers в python
+Проект направлен на создание своего собственного сервера и клиентской части на основе предоставленного шаблона (с некоторыми основными и побочными заданиями в основном коде)
+## Ниже - скриншоты шаблона
+### С мыслями (/think)
+![Скриншот 1](https://github.com/user-attachments/assets/3b5f53cc-0c2f-4fab-ab3b-9f0f7d5e29dc)
+### Без мыслей (/no_think)
+![Скриншот 2](https://github.com/user-attachments/assets/5041b21a-bd5c-485a-8484-624db80eba1b)
+
 # Руководство по установке и решению проблем
-
-![Скриншот 1](https://github.com/user-attachments/assets/064011c0-bdea-4c62-8989-f6a88e46b829)
-![Скриншот 2](https://github.com/user-attachments/assets/9a507cb2-4c2d-4450-90cf-d50bcd1adf62)
-
 ## Для ученика
 
 Чтобы запустить сервер:
