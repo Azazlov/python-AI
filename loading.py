@@ -14,7 +14,7 @@ def loading_animation(stop_event, message="Загрузка", result='Загру
 
     sys.stdout.write("\r" + " " * (len(message) + 10) + "\r")
     sys.stdout.flush()
-    print(result + f'за {i/10} секунд')
+    print(result + f' за {i/10} секунд')
 
 def loading(event, prompt):
     stop_loading = threading.Event()
